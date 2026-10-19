@@ -1,0 +1,50 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: fintegrita_app
+    cpus: '0.7'
+    mem_limit: 700m
+    restart: unless-stopped
+    ports:
+      - "8082:80"
+    volumes:
+      - ./.env:/var/www/html/.env
+      - storage-data:/var/www/html/storage
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - fintegrita_net
+
+  db:
+    image: mysql:8.0
+    container_name: fintegrita_db
+    cpus: '0.5'
+    mem_limit: 500m
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: db_fintegrita
+      MYSQL_USER: fintegrita_user
+      MYSQL_PASSWORD: Fintegrita_Secure_2026
+      MYSQL_ROOT_PASSWORD: Fintegrita_Root_2026
+    ports:
+      - "3308:3306"
+    volumes:
+      - db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u$$MYSQL_USER", "-p$$MYSQL_PASSWORD"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - fintegrita_net
+
+volumes:
+  db-data:
+  storage-data:
+
+networks:
+  fintegrita_net:
+    driver: bridge
