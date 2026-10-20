@@ -27,7 +27,8 @@ class PortalPanelProvider extends PanelProvider
             ->path('/portal')
             ->login()
             ->colors([
-                'primary' => Color::Teal,
+                'primary' => Color::Pink,
+                'secondary' => Color::Purple,
                 'gray' => Color::Slate,
             ])
             ->font('Outfit')

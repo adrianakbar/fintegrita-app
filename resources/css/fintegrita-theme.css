@@ -1,0 +1,27 @@
+/* Brand Fintegrita (fintegrita.com): pink #DF2C8B, dark pink #BD1874, purple #630C66, deep #250543 */
+.fi-body {
+    --primary: 223, 44, 139;
+    --primary-600: 189, 24, 116;
+    --primary-700: 99, 12, 102;
+    --gray-900: 37, 5, 67;
+}
+.fi-sidebar {
+    background: #250543;
+}
+.fi-sidebar .fi-sidebar-item,
+.fi-sidebar .fi-sidebar-group-label,
+.fi-sidebar .fi-brand {
+    color: rgba(255, 255, 255, 0.82);
+}
+.fi-sidebar .fi-sidebar-item-active .fi-sidebar-item-label {
+    color: #fff;
+}
+.fi-topbar,
+.fi-simple-header {
+    --tw-bg-opacity: 1;
+    background-color: rgb(255 255 255 / var(--tw-bg-opacity));
+}
+.fi-brand-name {
+    letter-spacing: 0.08em;
+    font-weight: 700;
+}
