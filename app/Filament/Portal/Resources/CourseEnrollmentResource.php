@@ -122,14 +122,4 @@ class CourseEnrollmentResource extends Resource
         ];
     }
 
-        public static function getEloquentQuery(): Builder
-    {
-        $query = parent::getEloquentQuery();
-        $user = auth()->user();
-        if ($user && !in_array($user->role, ['super_admin', 'director'], true)) {
-            $customerId = $user->customer?->id ?? 0;
-            return $query->where('customer_id', $customerId);
-        }
-        return $query;
-    }
 }
