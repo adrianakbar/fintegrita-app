@@ -113,6 +113,11 @@ class InvoiceResource extends Resource
                 //
             ])
             ->actions([
+                Tables\Actions\Action::make('pdf')
+                    ->label('PDF')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->color('gray')
+                    ->action(fn (Invoice $record) => app(\App\Services\InvoicePdfService::class)->download($record)),
                 Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([

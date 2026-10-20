@@ -20,6 +20,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         \App\Models\Payment::observe(\App\Observers\PaymentObserver::class);
+        \App\Models\Invoice::observe(\App\Observers\InvoiceObserver::class);
 
         // Tema brand Fintegrita: pink/purple sesuai fintegrita.com (inline, tanpa build step)
         \Filament\Support\Facades\FilamentView::registerRenderHook(
