@@ -5,13 +5,13 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\OrderResource\Pages;
 use App\Filament\Resources\OrderResource\RelationManagers;
 use App\Models\Order;
+use App\Support\FilamentKit;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Str;
 
 class OrderResource extends Resource
 {
@@ -20,85 +20,65 @@ class OrderResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-shopping-cart';
     protected static ?string $navigationGroup = 'Digital Store';
     protected static ?int $navigationSort = 3;
-
-
-
-
+    protected static ?string $navigationLabel = 'Order';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('customer_id')
-                    ->required()
-                    ->numeric(),
+                FilamentKit::relation('customer_id', 'Customer', 'name', 'Pelanggan'),
                 Forms\Components\TextInput::make('order_number')
+                    ->label('No. Order')
+                    ->default('ORD-'.now()->format('Ymd').'-'.Str::upper(Str::random(4)))
                     ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('total_amount')
-                    ->required()
-                    ->numeric()
-                    ->default(0.00),
-                Forms\Components\TextInput::make('discount_amount')
-                    ->required()
-                    ->numeric()
-                    ->default(0.00),
-                Forms\Components\TextInput::make('tax_amount')
-                    ->required()
-                    ->numeric()
-                    ->default(0.00),
-                Forms\Components\TextInput::make('final_amount')
-                    ->required()
-                    ->numeric()
-                    ->default(0.00),
-                Forms\Components\TextInput::make('status')
-                    ->required()
-                    ->maxLength(255)
-                    ->default('pending'),
-                Forms\Components\DateTimePicker::make('ordered_at')
+                    ->unique(ignoreRecord: true),
+                FilamentKit::money('total_amount', 'Total Sebelum Diskon'),
+                FilamentKit::money('discount_amount', 'Diskon'),
+                FilamentKit::money('tax_amount', 'Pajak'),
+                FilamentKit::money('final_amount', 'Total Akhir'),
+                Forms\Components\Select::make('status')
+                    ->options([
+                        'pending' => 'Pending',
+                        'confirmed' => 'Confirmed',
+                        'processing' => 'Processing',
+                        'completed' => 'Completed',
+                        'cancelled' => 'Cancelled',
+                    ])
+                    ->default('pending')
                     ->required(),
-                Forms\Components\Textarea::make('notes')
-                    ->columnSpanFull(),
-            ]);
+                Forms\Components\DateTimePicker::make('ordered_at')->label('Tanggal Order')->default(now())->required(),
+                Forms\Components\Textarea::make('notes')->label('Catatan')->columnSpanFull(),
+            ])->columns(2);
     }
 
     public static function table(Table $table): Table
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('customer_id')
-                    ->numeric()
-                    ->sortable(),
                 Tables\Columns\TextColumn::make('order_number')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('total_amount')
-                    ->numeric()
+                    ->label('No. Order')
+                    ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('discount_amount')
-                    ->numeric()
+                Tables\Columns\TextColumn::make('customer.name')
+                    ->label('Pelanggan')
+                    ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('tax_amount')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('final_amount')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('status')
-                    ->searchable(),
+                FilamentKit::moneyColumn('final_amount', 'Total Akhir'),
+                FilamentKit::statusColumn(),
                 Tables\Columns\TextColumn::make('ordered_at')
-                    ->dateTime()
+                    ->label('Tanggal')
+                    ->dateTime('d M Y H:i')
                     ->sortable(),
-                Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                Tables\Filters\SelectFilter::make('status')
+                    ->options([
+                        'pending' => 'Pending',
+                        'confirmed' => 'Confirmed',
+                        'processing' => 'Processing',
+                        'completed' => 'Completed',
+                        'cancelled' => 'Cancelled',
+                    ]),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
@@ -113,7 +93,7 @@ class OrderResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            RelationManagers\ItemsRelationManager::class,
         ];
     }
 

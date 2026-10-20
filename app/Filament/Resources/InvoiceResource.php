@@ -5,13 +5,14 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\InvoiceResource\Pages;
 use App\Filament\Resources\InvoiceResource\RelationManagers;
 use App\Models\Invoice;
+use App\Services\InvoicePdfService;
+use App\Support\FilamentKit;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Str;
 
 class InvoiceResource extends Resource
 {
@@ -20,117 +21,90 @@ class InvoiceResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
     protected static ?string $navigationGroup = 'Digital Store';
     protected static ?int $navigationSort = 4;
-
-
-
-
+    protected static ?string $navigationLabel = 'Invoice';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('order_id')
-                    ->numeric(),
-                Forms\Components\TextInput::make('customer_id')
-                    ->required()
-                    ->numeric(),
+                FilamentKit::relation('customer_id', 'Customer', 'name', 'Pelanggan'),
+                FilamentKit::relation('order_id', 'Order', 'order_number', 'Order (opsional)')
+                    ->required(false),
                 Forms\Components\TextInput::make('invoice_number')
+                    ->label('No. Invoice')
+                    ->default('INV-'.now()->format('Ymd').'-'.Str::upper(Str::random(4)))
                     ->required()
-                    ->maxLength(255),
-                Forms\Components\DatePicker::make('issue_date')
+                    ->unique(ignoreRecord: true),
+                Forms\Components\DatePicker::make('issue_date')->label('Tanggal Terbit')->default(now())->required(),
+                Forms\Components\DatePicker::make('due_date')->label('Jatuh Tempo')->default(now()->addDays(14))->required(),
+                FilamentKit::money('subtotal', 'Subtotal'),
+                FilamentKit::money('tax', 'Pajak'),
+                FilamentKit::money('total', 'Total'),
+                Forms\Components\Select::make('status')
+                    ->options([
+                        'draft' => 'Draft',
+                        'sent' => 'Sent',
+                        'partial' => 'Partial',
+                        'paid' => 'Paid',
+                        'void' => 'Void',
+                    ])
+                    ->default('sent')
                     ->required(),
-                Forms\Components\DatePicker::make('due_date')
-                    ->required(),
-                Forms\Components\TextInput::make('subtotal')
-                    ->required()
-                    ->numeric()
-                    ->default(0.00),
-                Forms\Components\TextInput::make('tax')
-                    ->required()
-                    ->numeric()
-                    ->default(0.00),
-                Forms\Components\TextInput::make('total')
-                    ->required()
-                    ->numeric()
-                    ->default(0.00),
-                Forms\Components\TextInput::make('amount_paid')
-                    ->required()
-                    ->numeric()
-                    ->default(0.00),
-                Forms\Components\TextInput::make('status')
-                    ->required()
-                    ->maxLength(255)
-                    ->default('unpaid'),
-                Forms\Components\TextInput::make('pdf_path')
-                    ->maxLength(255),
-            ]);
+            ])->columns(2);
     }
 
     public static function table(Table $table): Table
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('order_id')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('customer_id')
-                    ->numeric()
-                    ->sortable(),
                 Tables\Columns\TextColumn::make('invoice_number')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('issue_date')
-                    ->date()
+                    ->label('No. Invoice')
+                    ->searchable()
                     ->sortable(),
+                Tables\Columns\TextColumn::make('customer.name')
+                    ->label('Pelanggan')
+                    ->searchable()
+                    ->sortable(),
+                FilamentKit::moneyColumn('total', 'Total'),
+                FilamentKit::moneyColumn('amount_paid', 'Dibayar'),
                 Tables\Columns\TextColumn::make('due_date')
-                    ->date()
+                    ->label('Jatuh Tempo')
+                    ->date('d M Y')
+                    ->color(fn ($record) => $record->due_date->isPast() && ! in_array($record->status, ['paid', 'void'])
+                        ? 'danger' : 'gray')
                     ->sortable(),
-                Tables\Columns\TextColumn::make('subtotal')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('tax')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('total')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('amount_paid')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('status')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('pdf_path')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                FilamentKit::statusColumn(),
             ])
             ->filters([
-                //
+                Tables\Filters\SelectFilter::make('status')
+                    ->options([
+                        'draft' => 'Draft',
+                        'sent' => 'Sent',
+                        'partial' => 'Partial',
+                        'paid' => 'Paid',
+                        'void' => 'Void',
+                    ]),
             ])
             ->actions([
                 Tables\Actions\Action::make('pdf')
                     ->label('PDF')
                     ->icon('heroicon-o-arrow-down-tray')
                     ->color('gray')
-                    ->action(fn (Invoice $record) => app(\App\Services\InvoicePdfService::class)->download($record)),
+                    ->action(fn (Invoice $record) => app(InvoicePdfService::class)->download($record)),
                 Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
-            ]);
+            ])
+            ->defaultSort('issue_date', 'desc');
     }
 
     public static function getRelations(): array
     {
         return [
-            //
+            RelationManagers\PaymentsRelationManager::class,
         ];
     }
 
