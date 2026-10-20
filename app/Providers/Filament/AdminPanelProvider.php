@@ -30,15 +30,24 @@ class AdminPanelProvider extends PanelProvider
             ->colors([
                 'primary' => Color::Teal,
                 'gray' => Color::Slate,
+                'info' => Color::Blue,
+                'success' => Color::Emerald,
+                'warning' => Color::Orange,
+                'danger' => Color::Rose,
             ])
-            ->brandName('FINTEGRITA Admin')
+            ->font('Outfit')
+            ->brandName('FINTEGRITA')
+            ->brandLogo(asset('images/logo-mark.png'))
+            ->brandLogoHeight('2.5rem')
+            ->favicon(asset('favicon-32.png'))
+            ->sidebarCollapsibleOnDesktop()
             ->navigationGroups([
-                'Transaksi & Toko',
-                'Akuntansi & Keuangan',
+                'Keuangan & ERP',
+                'Digital Store',
                 'Proyek & Layanan',
-                'Fintegrita Academy',
-                'CRM & Prospek',
-                'Pengaturan & Audit',
+                'Academy & Pelatihan',
+                'CRM & Pelanggan',
+                'Sistem & Audit',
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')

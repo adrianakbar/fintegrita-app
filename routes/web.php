@@ -1,6 +1,8 @@
 <?php
 
+use Illuminate
 use Illuminate\Support\Facades\Route;
 
-// Company profile statis (repo fintegrita HTML) di root, panel tetap di /admin & /portal.
-Route::get('/', fn () => response()->file(public_path('site/index.html')));
+Route::get('/', function () {
+    return redirect()->away('https://fintegrita.com');
+});

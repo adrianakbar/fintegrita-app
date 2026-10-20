@@ -27,10 +27,15 @@ class PortalPanelProvider extends PanelProvider
             ->path('/portal')
             ->login()
             ->colors([
-                'primary' => Color::Sky,
+                'primary' => Color::Teal,
                 'gray' => Color::Slate,
             ])
-            ->brandName('FINTEGRITA Portal Pelanggan')
+            ->font('Outfit')
+            ->brandName('FINTEGRITA Portal')
+            ->brandLogo(asset('images/logo-mark.png'))
+            ->brandLogoHeight('2.5rem')
+            ->favicon(asset('favicon-32.png'))
+            ->topNavigation()
             ->discoverResources(in: app_path('Filament/Portal/Resources'), for: 'App\\Filament\\Portal\\Resources')
             ->discoverPages(in: app_path('Filament/Portal/Pages'), for: 'App\\Filament\\Portal\\Pages')
             ->pages([
