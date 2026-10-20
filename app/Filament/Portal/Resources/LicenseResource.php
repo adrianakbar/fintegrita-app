@@ -4,6 +4,7 @@ namespace App\Filament\Portal\Resources;
 
 use App\Filament\Portal\Resources\LicenseResource\Pages;
 use App\Filament\Portal\Resources\LicenseResource\RelationManagers;
+use App\Filament\Portal\Concerns\ScopedToCustomer;
 use App\Models\License;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -15,6 +16,8 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class LicenseResource extends Resource
 {
+    use ScopedToCustomer;
+
     protected static ?string $model = License::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-key';
@@ -107,8 +110,6 @@ class LicenseResource extends Resource
     {
         return [
             'index' => Pages\ListLicenses::route('/'),
-            'create' => Pages\CreateLicense::route('/create'),
-            'edit' => Pages\EditLicense::route('/{record}/edit'),
         ];
     }
 

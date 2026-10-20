@@ -4,6 +4,7 @@ namespace App\Filament\Portal\Resources;
 
 use App\Filament\Portal\Resources\OrderResource\Pages;
 use App\Filament\Portal\Resources\OrderResource\RelationManagers;
+use App\Filament\Portal\Concerns\ScopedToCustomer;
 use App\Models\Order;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -15,6 +16,8 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class OrderResource extends Resource
 {
+    use ScopedToCustomer;
+
     protected static ?string $model = Order::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-shopping-bag';
@@ -121,8 +124,6 @@ class OrderResource extends Resource
     {
         return [
             'index' => Pages\ListOrders::route('/'),
-            'create' => Pages\CreateOrder::route('/create'),
-            'edit' => Pages\EditOrder::route('/{record}/edit'),
         ];
     }
 

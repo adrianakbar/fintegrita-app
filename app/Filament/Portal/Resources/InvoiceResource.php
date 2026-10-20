@@ -4,6 +4,7 @@ namespace App\Filament\Portal\Resources;
 
 use App\Filament\Portal\Resources\InvoiceResource\Pages;
 use App\Filament\Portal\Resources\InvoiceResource\RelationManagers;
+use App\Filament\Portal\Concerns\ScopedToCustomer;
 use App\Models\Invoice;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -15,6 +16,8 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class InvoiceResource extends Resource
 {
+    use ScopedToCustomer;
+
     protected static ?string $model = Invoice::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
@@ -133,8 +136,6 @@ class InvoiceResource extends Resource
     {
         return [
             'index' => Pages\ListInvoices::route('/'),
-            'create' => Pages\CreateInvoice::route('/create'),
-            'edit' => Pages\EditInvoice::route('/{record}/edit'),
         ];
     }
 

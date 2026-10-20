@@ -4,6 +4,7 @@ namespace App\Filament\Portal\Resources;
 
 use App\Filament\Portal\Resources\CourseEnrollmentResource\Pages;
 use App\Filament\Portal\Resources\CourseEnrollmentResource\RelationManagers;
+use App\Filament\Portal\Concerns\ScopedToCustomer;
 use App\Models\CourseEnrollment;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -15,6 +16,8 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class CourseEnrollmentResource extends Resource
 {
+    use ScopedToCustomer;
+
     protected static ?string $model = CourseEnrollment::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-academic-cap';
@@ -116,8 +119,6 @@ class CourseEnrollmentResource extends Resource
     {
         return [
             'index' => Pages\ListCourseEnrollments::route('/'),
-            'create' => Pages\CreateCourseEnrollment::route('/create'),
-            'edit' => Pages\EditCourseEnrollment::route('/{record}/edit'),
         ];
     }
 
