@@ -2,6 +2,5 @@
 
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return redirect('/admin');
-});
+// Company profile statis (repo fintegrita HTML) di root, panel tetap di /admin & /portal.
+Route::get('/', fn () => response()->file(public_path('site/index.html')));
